@@ -21,7 +21,7 @@ use Zend\Diactoros\ServerRequest;
 /**
  * @package ActiveCollab\MiddlewareStack\Test
  */
-class MiddlewareStackTest extends TestCase
+class StackExecutionTest extends TestCase
 {
     public function testStackExecution()
     {

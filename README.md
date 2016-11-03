@@ -34,9 +34,27 @@ $stack->addMiddleware(function (ServerRequestInterface $request, ResponseInterfa
 $response = $stack->process(new ServerRequest(), new Response());
 ```
 
-This example shows a simple authorization check prior to request being sent further down to routing, controller, and result encoding. 
+This example shows a simple authorization check prior to request being sent further down to routing, controller, and result encoding.
+ 
+## Error Handling
 
-## Extension points
+Stack exposes a way to handle exceptions (which extend `\Exception` class) and PHP errors (which are `\Throwable`, but don't extend `\Exception` class, available in PHP7 and up):
+
+```php
+$stack->setExceptionHandler(function (Exception $e, ServerRequestInterface $request, ResponseInterface $response) {
+    $response = $response->withStatus(500, 'Exception: ' . $e->getMessage());
+
+    return $response;
+});
+
+$stack->setPhpErrorHandler(function (Throwable $e, ServerRequestInterface $request, ResponseInterface $response) {
+    $response = $response->withStatus(500, 'PHP error: ' . $e->getMessage());
+
+    return $response;
+});
+```
+
+## Extension Points
 
 You can use `MiddlewareStack` implementation as is, or you can extend it to change its behaviour. There are two extra `protected` methods that you can use to hook in your behaviour in the stack execution:
 
