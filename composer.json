@@ -1,0 +1,32 @@
+{
+    "name": "activecollab/middlewarestack",
+    "type": "library",
+    "description": "Port of Slim's middleware stack implementation as a stand-alone package",
+    "license": "MIT",
+    "keywords": [
+        "middleware",
+        "psr7"
+    ],
+    "homepage": "https://labs.activecollab.com",
+    "authors": [
+        {
+            "name": "Ilija Studen",
+            "email": "ilija.studen@activecollab.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.6.0",
+        "psr/http-message": "^1.0"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "~1.0",
+        "phpunit/phpunit": "~5.0",
+        "zendframework/zend-diactoros": "^1.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "ActiveCollab\\MiddlewareStack\\": "src",
+            "ActiveCollab\\MiddlewareStack\\Test\\": "test/src"
+        }
+    }
+}
