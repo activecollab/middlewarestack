@@ -1,5 +1,7 @@
 # Middleware Stack
 
+[![Build Status](https://travis-ci.org/activecollab/middlewarestack.svg?branch=master)](https://travis-ci.org/activecollab/middlewarestack)
+
 This package lets you build a stack of middlewares and run requests through them to their coresponding responses. Stack is Last In First Out stack (LIFO), meaning that middlewares that are added later are considered to be "outter" middlewares, and they are executed first.  
 
 Example:
@@ -36,7 +38,9 @@ This example shows a simple authorization check prior to request being sent furt
 
 ## Extension points
 
-1. `MiddlewareStack` is called in the middle of execution, as just another middle. Override `__invoke` method if you need to inject extra functionlity there (like routing, with per-route middleware stack for example),
+You can use `MiddlewareStack` implementation as is, or you can extend it to change its behaviour. There are two extra `protected` methods that you can use to hook in your behaviour in the stack execution:
+
+1. `MiddlewareStack` is called in the middle of execution, as just another middleware. Override `__invoke` method if you need to inject extra functionlity there (like routing, with per-route middleware stack for example),
 1. `finalizeProcessing` is called prior to $response being returned by `process` method. Override if you need to do something with response prior to returning it.
 
 ## History
