@@ -38,7 +38,8 @@ class ExceptionHandlingTest extends TestCase
             throw new RuntimeException('Bubbles');
         });
 
-        $stack->process(new ServerRequest(), new Response());
+        $request = new ServerRequest();
+        $stack->process($request, new Response());
     }
 
     public function testExceptionHandler()
@@ -56,7 +57,8 @@ class ExceptionHandlingTest extends TestCase
 
         $response = (new Response())->withHeader('X-Testing-MiddewareStack', 'yes!');
 
-        $response = $stack->process(new ServerRequest(), $response);
+        $request = new ServerRequest();
+        $response = $stack->process($request, $response);
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertEquals('yes!', $response->getHeaderLine('X-Testing-MiddewareStack'));
 
@@ -83,7 +85,8 @@ class ExceptionHandlingTest extends TestCase
 
         $response = (new Response())->withHeader('X-Testing-MiddewareStack', 'yes!');
 
-        $response = $stack->process(new ServerRequest(), $response);
+        $request = new ServerRequest();
+        $response = $stack->process($request, $response);
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertEquals('yes!', $response->getHeaderLine('X-Testing-MiddewareStack'));
 
