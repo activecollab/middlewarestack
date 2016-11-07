@@ -69,9 +69,10 @@ class StackExecutionTest extends TestCase
             return $response;
         });
 
+        $request = new ServerRequest();
         $response = (new Response())->withHeader('X-Testing-MiddewareStack', 'yes!');
 
-        $response = $stack->process(new ServerRequest(), $response);
+        $response = $stack->process($request, $response);
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertEquals('yes!', $response->getHeaderLine('X-Testing-MiddewareStack'));
 
@@ -82,5 +83,76 @@ class StackExecutionTest extends TestCase
         $this->assertSame(4, $inner_post_exec);
         $this->assertSame(5, $middle_post_exec);
         $this->assertSame(6, $outer_post_exec);
+    }
+
+    public function testRequestAttributes()
+    {
+        $stack = new MiddlewareStack();
+
+        $execution_counter = 1;
+
+        $inner_pre_exec = $inner_post_exec = false;
+        $middle_pre_exec = $middle_post_exec = false;
+        $outer_pre_exec = $outer_post_exec = false;
+
+        $stack->addMiddleware(function (ServerRequestInterface &$request, ResponseInterface $response, callable $next = null) use (&$execution_counter, &$inner_pre_exec, &$inner_post_exec) {
+            $counter = $request->getAttribute('counter');
+
+            if (empty($counter)) {
+                $request = $request->withAttribute('counter', 1);
+            } else {
+                $request = $request->withAttribute('counter', $counter + 1);
+            }
+
+            if (is_callable($next)) {
+                /** @var ServerRequestInterface $request */
+                $response = $next($request, $response);
+            }
+
+            $counter = $request->getAttribute('counter');
+
+            if (empty($counter)) {
+                $request = $request->withAttribute('counter', 1);
+            } else {
+                $request = $request->withAttribute('counter', $counter + 1);
+            }
+
+            return $response;
+        });
+
+        $stack->addMiddleware(function (ServerRequestInterface &$request, ResponseInterface $response, callable $next = null) use (&$execution_counter, &$middle_pre_exec, &$middle_post_exec) {
+            $counter = $request->getAttribute('counter');
+
+            if (empty($counter)) {
+                $request = $request->withAttribute('counter', 1);
+            } else {
+                $request = $request->withAttribute('counter', $counter + 1);
+            }
+
+            if (is_callable($next)) {
+                /** @var ServerRequestInterface $request */
+                $response = $next($request, $response);
+            }
+
+            $counter = $request->getAttribute('counter');
+
+            if (empty($counter)) {
+                $request = $request->withAttribute('counter', 1);
+            } else {
+                $request = $request->withAttribute('counter', $counter + 1);
+            }
+
+            return $response;
+        });
+
+        $response = (new Response())->withHeader('X-Testing-MiddewareStack', 'yes!');
+
+        $request = new ServerRequest();
+
+        $response = $stack->process($request, $response);
+        $this->assertInstanceOf(ResponseInterface::class, $response);
+        $this->assertEquals('yes!', $response->getHeaderLine('X-Testing-MiddewareStack'));
+
+        $this->assertEquals(4, $request->getAttribute('counter'));
     }
 }

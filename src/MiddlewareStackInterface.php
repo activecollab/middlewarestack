@@ -31,7 +31,7 @@ interface MiddlewareStackInterface
      * @return ResponseInterface
      * @throws Exception
      */
-    public function process(ServerRequestInterface $request, ResponseInterface $response);
+    public function process(ServerRequestInterface &$request, ResponseInterface $response);
 
     /**
      * Add middleware.

@@ -43,7 +43,7 @@ class MiddlewareStack implements MiddlewareStackInterface
     /**
      * {@inheritdoc}
      */
-    public function process(ServerRequestInterface $request, ResponseInterface $response)
+    public function process(ServerRequestInterface &$request, ResponseInterface $response)
     {
         try {
             $response = $this->callMiddlewareStack($request, $response);
@@ -82,8 +82,8 @@ class MiddlewareStack implements MiddlewareStackInterface
             $this->seedMiddlewareStack();
         }
         $next = $this->stack->top();
-        $this->stack[] = function (ServerRequestInterface $req, ResponseInterface $res) use ($callable, $next) {
-            $result = call_user_func($callable, $req, $res, $next);
+        $this->stack[] = function (ServerRequestInterface &$req, ResponseInterface $res) use ($callable, $next) {
+            $result = call_user_func_array($callable, [&$req, $res, $next]);
             if ($result instanceof ResponseInterface === false) {
                 throw new UnexpectedValueException('Middleware must return instance of \Psr\Http\Message\ResponseInterface');
             }
@@ -122,7 +122,7 @@ class MiddlewareStack implements MiddlewareStackInterface
      *
      * @return ResponseInterface
      */
-    protected function callMiddlewareStack(ServerRequestInterface $req, ResponseInterface $res)
+    protected function callMiddlewareStack(ServerRequestInterface &$req, ResponseInterface $res)
     {
         if (is_null($this->stack)) {
             $this->seedMiddlewareStack();
@@ -130,7 +130,7 @@ class MiddlewareStack implements MiddlewareStackInterface
         /** @var callable $start */
         $start = $this->stack->top();
         $this->middleware_lock = true;
-        $resp = $start($req, $res);
+        $resp = call_user_func_array($start, [&$req, $res]);
         $this->middleware_lock = false;
 
         return $resp;
