@@ -54,7 +54,7 @@ class MiddlewareStack implements MiddlewareStackInterface
         }
 
         if (!$response instanceof ResponseInterface) {
-            throw new RuntimeException('Response excpected');
+            throw new RuntimeException('Response expected');
         }
 
         $response = $this->finalizeProcessing($response);
@@ -186,7 +186,7 @@ class MiddlewareStack implements MiddlewareStackInterface
     protected function handleException(Exception $e, ServerRequestInterface &$request, ResponseInterface $response)
     {
         if ($this->exception_handler) {
-            return call_user_func_array($this->exception_handler, func_get_args());
+            return call_user_func_array($this->exception_handler, [$e, &$request, $response]);
         }
 
         throw $e; // No handlers found, so just throw the exception
@@ -220,7 +220,7 @@ class MiddlewareStack implements MiddlewareStackInterface
     protected function handlePhpError(Throwable $e, ServerRequestInterface &$request, ResponseInterface $response)
     {
         if ($this->php_error_handler) {
-            return call_user_func_array($this->php_error_handler, func_get_args());
+            return call_user_func_array($this->php_error_handler, [$e, &$request, $response]);
         }
 
         throw $e; // No handlers found, so just throw the exception
