@@ -53,6 +53,10 @@ class MiddlewareStack implements MiddlewareStackInterface
             $response = $this->handlePhpError($e, $request, $response);
         }
 
+        if (!$response instanceof ResponseInterface) {
+            throw new RuntimeException('Response excpected');
+        }
+
         $response = $this->finalizeProcessing($response);
 
         return $response;
@@ -149,7 +153,7 @@ class MiddlewareStack implements MiddlewareStackInterface
      *
      * @return ResponseInterface
      */
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response)
+    public function __invoke(ServerRequestInterface &$request, ResponseInterface $response)
     {
         return $response;
     }
@@ -179,7 +183,7 @@ class MiddlewareStack implements MiddlewareStackInterface
      * @return ResponseInterface
      * @throws Exception
      */
-    protected function handleException(Exception $e, ServerRequestInterface $request, ResponseInterface $response)
+    protected function handleException(Exception $e, ServerRequestInterface &$request, ResponseInterface $response)
     {
         if ($this->exception_handler) {
             return call_user_func_array($this->exception_handler, func_get_args());
@@ -213,7 +217,7 @@ class MiddlewareStack implements MiddlewareStackInterface
      * @return ResponseInterface
      * @throws Throwable
      */
-    protected function handlePhpError(Throwable $e, ServerRequestInterface $request, ResponseInterface $response)
+    protected function handlePhpError(Throwable $e, ServerRequestInterface &$request, ResponseInterface $response)
     {
         if ($this->php_error_handler) {
             return call_user_func_array($this->php_error_handler, func_get_args());
