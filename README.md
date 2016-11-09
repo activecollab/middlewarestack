@@ -9,7 +9,7 @@ Example:
 ```php
 $stack = new MiddlewareStack();
 
-$stack->addMiddleware(function (ServerRequestInterface &$request, ResponseInterface $response, callable $next = null) {
+$stack->addMiddleware(function (ServerRequestInterface $request, ResponseInterface $response, callable $next = null) {
    // Route request to the contraoller, execute action, and encode action result to response
 
    if ($next) {
@@ -19,7 +19,7 @@ $stack->addMiddleware(function (ServerRequestInterface &$request, ResponseInterf
    return $response;
 });
 
-$stack->addMiddleware(function (ServerRequestInterface &$request, ResponseInterface $response, callable $next = null) {
+$stack->addMiddleware(function (ServerRequestInterface $request, ResponseInterface $response, callable $next = null) {
    if (!user_is_authenticated($request)) {
        return $response->withStatus(403); // Break here if user is not authenticated
    }
@@ -42,13 +42,13 @@ This example shows a simple authorization check prior to request being sent furt
 Stack exposes a way to handle exceptions (which extend `\Exception` class) and PHP errors (which are `\Throwable`, but don't extend `\Exception` class, available in PHP7 and up):
 
 ```php
-$stack->setExceptionHandler(function (Exception $e, ServerRequestInterface &$request, ResponseInterface $response) {
+$stack->setExceptionHandler(function (Exception $e, ServerRequestInterface $request, ResponseInterface $response) {
     $response = $response->withStatus(500, 'Exception: ' . $e->getMessage());
 
     return $response;
 });
 
-$stack->setPhpErrorHandler(function (Throwable $e, ServerRequestInterface &$request, ResponseInterface $response) {
+$stack->setPhpErrorHandler(function (Throwable $e, ServerRequestInterface $request, ResponseInterface $response) {
     $response = $response->withStatus(500, 'PHP error: ' . $e->getMessage());
 
     return $response;
