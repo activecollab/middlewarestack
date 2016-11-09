@@ -43,7 +43,7 @@ class MiddlewareStack implements MiddlewareStackInterface
     /**
      * {@inheritdoc}
      */
-    public function process(ServerRequestInterface &$request, ResponseInterface $response)
+    public function process(ServerRequestInterface $request, ResponseInterface $response)
     {
         try {
             $response = $this->callMiddlewareStack($request, $response);
@@ -86,8 +86,8 @@ class MiddlewareStack implements MiddlewareStackInterface
             $this->seedMiddlewareStack();
         }
         $next = $this->stack->top();
-        $this->stack[] = function (ServerRequestInterface &$req, ResponseInterface $res) use ($callable, $next) {
-            $result = call_user_func_array($callable, [&$req, $res, $next]);
+        $this->stack[] = function (ServerRequestInterface $req, ResponseInterface $res) use ($callable, $next) {
+            $result = call_user_func_array($callable, [$req, $res, $next]);
             if ($result instanceof ResponseInterface === false) {
                 throw new UnexpectedValueException('Middleware must return instance of \Psr\Http\Message\ResponseInterface');
             }
@@ -126,7 +126,7 @@ class MiddlewareStack implements MiddlewareStackInterface
      *
      * @return ResponseInterface
      */
-    protected function callMiddlewareStack(ServerRequestInterface &$req, ResponseInterface $res)
+    protected function callMiddlewareStack(ServerRequestInterface $req, ResponseInterface $res)
     {
         if (is_null($this->stack)) {
             $this->seedMiddlewareStack();
@@ -134,7 +134,7 @@ class MiddlewareStack implements MiddlewareStackInterface
         /** @var callable $start */
         $start = $this->stack->top();
         $this->middleware_lock = true;
-        $resp = call_user_func_array($start, [&$req, $res]);
+        $resp = call_user_func_array($start, [$req, $res]);
         $this->middleware_lock = false;
 
         return $resp;
@@ -153,7 +153,7 @@ class MiddlewareStack implements MiddlewareStackInterface
      *
      * @return ResponseInterface
      */
-    public function __invoke(ServerRequestInterface &$request, ResponseInterface $response)
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response)
     {
         return $response;
     }
@@ -183,10 +183,10 @@ class MiddlewareStack implements MiddlewareStackInterface
      * @return ResponseInterface
      * @throws Exception
      */
-    protected function handleException(Exception $e, ServerRequestInterface &$request, ResponseInterface $response)
+    protected function handleException(Exception $e, ServerRequestInterface $request, ResponseInterface $response)
     {
         if ($this->exception_handler) {
-            return call_user_func_array($this->exception_handler, [$e, &$request, $response]);
+            return call_user_func_array($this->exception_handler, [$e, $request, $response]);
         }
 
         throw $e; // No handlers found, so just throw the exception
@@ -217,10 +217,10 @@ class MiddlewareStack implements MiddlewareStackInterface
      * @return ResponseInterface
      * @throws Throwable
      */
-    protected function handlePhpError(Throwable $e, ServerRequestInterface &$request, ResponseInterface $response)
+    protected function handlePhpError(Throwable $e, ServerRequestInterface $request, ResponseInterface $response)
     {
         if ($this->php_error_handler) {
-            return call_user_func_array($this->php_error_handler, [$e, &$request, $response]);
+            return call_user_func_array($this->php_error_handler, [$e, $request, $response]);
         }
 
         throw $e; // No handlers found, so just throw the exception

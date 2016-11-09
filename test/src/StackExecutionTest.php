@@ -85,17 +85,11 @@ class StackExecutionTest extends TestCase
         $this->assertSame(6, $outer_post_exec);
     }
 
-    public function testRequestAttributes()
+    public function testRequestAttributesDontBubbleOut()
     {
         $stack = new MiddlewareStack();
 
-        $execution_counter = 1;
-
-        $inner_pre_exec = $inner_post_exec = false;
-        $middle_pre_exec = $middle_post_exec = false;
-        $outer_pre_exec = $outer_post_exec = false;
-
-        $stack->addMiddleware(function (ServerRequestInterface &$request, ResponseInterface $response, callable $next = null) use (&$execution_counter, &$inner_pre_exec, &$inner_post_exec) {
+        $outer_middleware = function (ServerRequestInterface $request, ResponseInterface $response, callable $next = null) {
             $counter = $request->getAttribute('counter');
 
             if (empty($counter)) {
@@ -103,24 +97,21 @@ class StackExecutionTest extends TestCase
             } else {
                 $request = $request->withAttribute('counter', $counter + 1);
             }
+
+            $this->assertSame(1, $request->getAttribute('counter'));
 
             if (is_callable($next)) {
                 /** @var ServerRequestInterface $request */
                 $response = $next($request, $response);
             }
 
-            $counter = $request->getAttribute('counter');
-
-            if (empty($counter)) {
-                $request = $request->withAttribute('counter', 1);
-            } else {
-                $request = $request->withAttribute('counter', $counter + 1);
-            }
+            $request = $request->withAttribute('counter', $request->getAttribute('counter') + 1);
+            $this->assertSame(2, $request->getAttribute('counter'));
 
             return $response;
-        });
+        };
 
-        $stack->addMiddleware(function (ServerRequestInterface &$request, ResponseInterface $response, callable $next = null) use (&$execution_counter, &$middle_pre_exec, &$middle_post_exec) {
+        $inner_middleware = function (ServerRequestInterface $request, ResponseInterface $response, callable $next = null) {
             $counter = $request->getAttribute('counter');
 
             if (empty($counter)) {
@@ -128,22 +119,22 @@ class StackExecutionTest extends TestCase
             } else {
                 $request = $request->withAttribute('counter', $counter + 1);
             }
+
+            $this->assertSame(2, $request->getAttribute('counter'));
 
             if (is_callable($next)) {
                 /** @var ServerRequestInterface $request */
                 $response = $next($request, $response);
             }
 
-            $counter = $request->getAttribute('counter');
-
-            if (empty($counter)) {
-                $request = $request->withAttribute('counter', 1);
-            } else {
-                $request = $request->withAttribute('counter', $counter + 1);
-            }
+            $request = $request->withAttribute('counter', $request->getAttribute('counter') + 1);
+            $this->assertSame(3, $request->getAttribute('counter'));
 
             return $response;
-        });
+        };
+
+        $stack->addMiddleware($inner_middleware);
+        $stack->addMiddleware($outer_middleware);
 
         $response = (new Response())->withHeader('X-Testing-MiddewareStack', 'yes!');
 
@@ -153,6 +144,6 @@ class StackExecutionTest extends TestCase
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertEquals('yes!', $response->getHeaderLine('X-Testing-MiddewareStack'));
 
-        $this->assertEquals(4, $request->getAttribute('counter'));
+        $this->assertEmpty($request->getAttribute('counter'));
     }
 }
