@@ -66,4 +66,4 @@ You can use `MiddlewareStack` implementation as is, or you can extend it to chan
 
 Most middleware implementations that we found in November 2016. assumed and did too much, being mini frameworks themselves - they anticipated routing, substacking etc. 
 
-[Slim framework](http://www.slimframework.com) has a nice middleware stack implementation, but it was not available as a stand-alomponent, something that we needed, so we decided to extract it.
+[Slim framework](http://www.slimframework.com) has a nice middleware stack implementation, but it was not available as a stand-alone component, something that we needed, so we decided to extract it.
