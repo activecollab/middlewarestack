@@ -9,11 +9,12 @@
  * with this source code in the file LICENSE.
  */
 
+declare(strict_types=1);
+
 namespace ActiveCollab\MiddlewareStack\Test\Base;
 
-/**
- * @package ActiveCollab\Notifications\Test
- */
-abstract class TestCase extends \PHPUnit_Framework_TestCase
+use PHPUnit\Framework\TestCase as BaseTestCase;
+
+abstract class TestCase extends BaseTestCase
 {
 }

@@ -9,6 +9,8 @@
  * with this source code in the file LICENSE.
  */
 
+declare(strict_types=1);
+
 namespace ActiveCollab\MiddlewareStack\Test;
 
 use ActiveCollab\MiddlewareStack\MiddlewareStack;
@@ -18,12 +20,9 @@ use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\ServerRequest;
 
-/**
- * @package ActiveCollab\MiddlewareStack\Test
- */
 class StackExecutionTest extends TestCase
 {
-    public function testStackExecution()
+    public function testStackExecution(): void
     {
         $stack = new MiddlewareStack();
 
@@ -70,11 +69,11 @@ class StackExecutionTest extends TestCase
         });
 
         $request = new ServerRequest();
-        $response = (new Response())->withHeader('X-Testing-MiddewareStack', 'yes!');
+        $response = (new Response())->withHeader('X-Testing-MiddlewareStack', 'yes!');
 
         $response = $stack->process($request, $response);
         $this->assertInstanceOf(ResponseInterface::class, $response);
-        $this->assertEquals('yes!', $response->getHeaderLine('X-Testing-MiddewareStack'));
+        $this->assertEquals('yes!', $response->getHeaderLine('X-Testing-MiddlewareStack'));
 
         $this->assertSame(1, $outer_pre_exec);
         $this->assertSame(2, $middle_pre_exec);
@@ -85,7 +84,7 @@ class StackExecutionTest extends TestCase
         $this->assertSame(6, $outer_post_exec);
     }
 
-    public function testRequestAttributesDontBubbleOut()
+    public function testRequestAttributesDontBubbleOut(): void
     {
         $stack = new MiddlewareStack();
 
@@ -101,7 +100,6 @@ class StackExecutionTest extends TestCase
             $this->assertSame(1, $request->getAttribute('counter'));
 
             if (is_callable($next)) {
-                /** @var ServerRequestInterface $request */
                 $response = $next($request, $response);
             }
 
@@ -123,7 +121,6 @@ class StackExecutionTest extends TestCase
             $this->assertSame(2, $request->getAttribute('counter'));
 
             if (is_callable($next)) {
-                /** @var ServerRequestInterface $request */
                 $response = $next($request, $response);
             }
 
@@ -136,13 +133,13 @@ class StackExecutionTest extends TestCase
         $stack->addMiddleware($inner_middleware);
         $stack->addMiddleware($outer_middleware);
 
-        $response = (new Response())->withHeader('X-Testing-MiddewareStack', 'yes!');
+        $response = (new Response())->withHeader('X-Testing-MiddlewareStack', 'yes!');
 
         $request = new ServerRequest();
 
         $response = $stack->process($request, $response);
         $this->assertInstanceOf(ResponseInterface::class, $response);
-        $this->assertEquals('yes!', $response->getHeaderLine('X-Testing-MiddewareStack'));
+        $this->assertEquals('yes!', $response->getHeaderLine('X-Testing-MiddlewareStack'));
 
         $this->assertEmpty($request->getAttribute('counter'));
     }
